@@ -1,7 +1,6 @@
-import { Center, Flex, Image, Text } from '@chakra-ui/react'
+import { Center, Flex } from '@chakra-ui/react'
 import { HeaderBar } from '../../components/HeaderBar'
 import BookingCalendar from './components/bookingCalendar'
-
 
 export function Home() {
 

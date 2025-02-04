@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import apiClient from ".";
 
-// Tipagem para os slots
 interface Slot {
     id: number;
-    start_time: string; // Formato "HH:mm"
-    end_time: string;   // Formato "HH:mm"
+    start_time: string;
+    end_time: string;
+    reserved: boolean;
 }
 
 export function useSlots() {
@@ -17,11 +17,11 @@ export function useSlots() {
         async function fetchSlots() {
             try {
                 setIsLoading(true);
-                const response = await apiClient.get<Slot[]>("/slots/"); // Chama o endpoint
+                const response = await apiClient.get<Slot[]>("/slots/");
                 setSlots(response.data);
             } catch (err) {
-                console.error("Erro ao buscar slots:", err);
-                setError("Não foi possível carregar os slots.");
+                console.error("Error fetching slots:", err);
+                setError("Unable to load slots.");
             } finally {
                 setIsLoading(false);
             }
