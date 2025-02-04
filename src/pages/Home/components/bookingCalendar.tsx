@@ -7,6 +7,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { Box, Center, Spinner, Text, useToast } from "@chakra-ui/react";
 import { useSlots } from "../../../api/useSlots";
 import apiClient from "../../../api";
+import { convertDateFormat } from "../../../utils/functions";
 
 export default function BookingCalendar() {
     const { slots, isLoading, error } = useSlots();
@@ -30,7 +31,7 @@ export default function BookingCalendar() {
 
     const handleEventClick = async (info: any) => {
         const confirm = window.confirm(
-            `Do you want to reserve the time slot from ${info.event.startStr} to ${info.event.endStr}?`
+            `Do you want to reserve the time slot from ${convertDateFormat(info.event.startStr)} to ${convertDateFormat(info.event.endStr)}?`
         );
         if (!confirm) return;
 
@@ -81,7 +82,7 @@ export default function BookingCalendar() {
             ) : (
                 <FullCalendar
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                    initialView="timeGridDay"
+                    initialView="dayGridMonth"
                     events={events}
                     eventDidMount={(info) => {
                         info.el.style.cursor = "pointer";
