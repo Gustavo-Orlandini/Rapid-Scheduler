@@ -52,7 +52,7 @@ To run the project locally, follow these steps:
 3. **Set up environment variables**:
     Create a [.env](http://_vscodecontentref_/1) file in the root directory and add the following variables:
     ```env
-    VITE_API_URL=http://127.0.0.1:8000
+    VITE_API_BASE_URL=http://127.0.0.1:8000
     ```
 This URL value comes from the Back-End project created in Python (Repo:https://github.com/Gustavo-Orlandini/Rapid-Scheduler-backend). After running it locally, it will provide a URL with the available port as shown in the example below:
 
