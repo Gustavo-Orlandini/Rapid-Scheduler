@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import { EventInput } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -8,12 +8,15 @@ import { Box, Center, Spinner, Text, useToast } from "@chakra-ui/react";
 import { useSlots } from "../../../api/useSlots";
 import apiClient from "../../../api";
 import { convertDateFormat } from "../../../utils/functions";
+import ConfirmModal from "./confirmModal";
 
 export default function BookingCalendar() {
     const { slots, isLoading, error } = useSlots();
     const [events, setEvents] = useState<EventInput[]>([]);
     const toast = useToast();
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
     const mapSlotsToEvents = (slots: any[]): EventInput[] =>
         slots.map((slot) => ({
@@ -29,20 +32,23 @@ export default function BookingCalendar() {
         setEvents(mapSlotsToEvents(slots));
     }, [slots]);
 
-    const handleEventClick = async (info: any) => {
-        const confirm = window.confirm(
-            `Do you want to reserve the time slot from ${convertDateFormat(info.event.startStr)} to ${convertDateFormat(info.event.endStr)}?`
-        );
-        if (!confirm) return;
+    const handleEventClick = (info: any) => {
+        setSelectedEvent(info);
+        setIsModalOpen(true);
+    };
 
-        const start_time = new Date(info.event.startStr).toISOString();
-        const end_time = new Date(info.event.endStr).toISOString();
+    const handleConfirmReservation = async () => {
+        if (!selectedEvent) return;
+
+        const start_time = new Date(selectedEvent.event.startStr).toISOString();
+        const end_time = new Date(selectedEvent.event.endStr).toISOString();
 
         setIsUpdating(true);
+        setIsModalOpen(false);
 
         try {
             await apiClient.post("/bookings/", {
-                id: parseInt(info.event.id),
+                id: parseInt(selectedEvent.event.id),
                 start_time,
                 end_time,
             });
@@ -80,22 +86,34 @@ export default function BookingCalendar() {
             ) : error ? (
                 <Text color="red.500">{error}</Text>
             ) : (
-                <FullCalendar
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                    initialView="dayGridMonth"
-                    events={events}
-                    eventDidMount={(info) => {
-                        info.el.style.cursor = "pointer";
-                    }}
-                    headerToolbar={{
-                        left: "prev,next today",
-                        center: "title",
-                        right: "dayGridMonth,timeGridWeek,timeGridDay",
-                    }}
-                    editable={false}
-                    selectable={false}
-                    eventClick={handleEventClick}
-                />
+                <>
+                    <FullCalendar
+                        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                        initialView="dayGridMonth"
+                        events={events}
+                        eventDidMount={(info) => {
+                            info.el.style.cursor = "pointer";
+                        }}
+                        headerToolbar={{
+                            left: "prev,next today",
+                            center: "title",
+                            right: "dayGridMonth,timeGridWeek,timeGridDay",
+                        }}
+                        editable={false}
+                        selectable={false}
+                        eventClick={handleEventClick}
+                    />
+
+                    <ConfirmModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        onConfirm={handleConfirmReservation}
+                        title="Confirm Reservation"
+                        description={`Do you want to reserve the time slot from ${convertDateFormat(
+                            selectedEvent?.event.startStr
+                        )} to ${convertDateFormat(selectedEvent?.event.endStr)}?`}
+                    />
+                </>
             )}
         </Box>
     );
